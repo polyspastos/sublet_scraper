@@ -7,6 +7,7 @@ import webbrowser
 import random
 import time
 import pathlib
+import datetime
 
 
 class AlberletHuScraper:
@@ -108,8 +109,9 @@ def open_listing_urls_in_browser(urls: List[str], db_path: str):
         cursor.execute("SELECT COUNT(*) FROM listings WHERE url = ?", (url,))
         count = cursor.fetchone()[0]
         if count == 0:
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             webbrowser.open(url)  # Open URL in default web browser
-            cursor.execute("INSERT INTO listings (url) VALUES (?)", (url,))
+            cursor.execute("INSERT INTO listings (url, timestamp) VALUES (?, ?)", (url, timestamp))
             conn.commit()
             time.sleep(0.2)
 
@@ -129,7 +131,7 @@ def main():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
-        "CREATE TABLE IF NOT EXISTS listings (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT)"
+        "CREATE TABLE IF NOT EXISTS listings (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT, timestamp TEXT)"
     )
     conn.commit()
     conn.close()
